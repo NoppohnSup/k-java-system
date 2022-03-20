@@ -7,6 +7,7 @@ import com.example.kjavasystem.transaction.request.TransactionRequest;
 import com.example.kjavasystem.transaction.response.TransactionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,6 +16,11 @@ public class TransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
+    public TransactionService(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
+
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest transactionRequest){
         try {
             String moneyBoxId = UUID.randomUUID().toString();
