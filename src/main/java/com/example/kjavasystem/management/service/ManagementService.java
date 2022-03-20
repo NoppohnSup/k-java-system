@@ -9,12 +9,9 @@ import com.example.kjavasystem.transaction.repository.BankMoneyHistoryRepository
 import com.example.kjavasystem.transaction.repository.BankMoneyRepository;
 import com.example.kjavasystem.transaction.repository.EmployeeRepository;
 import com.example.kjavasystem.utils.DateUtils;
-import com.example.kjavasystem.utils.enums.MessageResponseEnum;
 import com.example.kjavasystem.utils.enums.RoleEnum;
-import com.example.kjavasystem.utils.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
@@ -38,6 +35,14 @@ public class ManagementService {
 
     public void setEmployeeRepository(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
+    }
+
+    public void setBankMoneyHistoryRepository(BankMoneyHistoryRepository bankMoneyHistoryRepository) {
+        this.bankMoneyHistoryRepository = bankMoneyHistoryRepository;
+    }
+
+    public void setDateUtils(DateUtils dateUtils) {
+        this.dateUtils = dateUtils;
     }
 
     public TotalMoneyResponse getTotalMoneyFromBranch(int branchId, int employeeId) {

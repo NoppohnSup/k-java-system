@@ -1,5 +1,6 @@
 package com.example.kjavasystem.management.controller;
 
+import com.example.kjavasystem.management.reqeust.UpdateBankMoneyRequest;
 import com.example.kjavasystem.management.response.TotalMoneyResponse;
 import com.example.kjavasystem.management.service.ManagementService;
 import com.example.kjavasystem.transaction.entity.BankMoney;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +37,8 @@ class ManagementControllerTest {
     private ManagementService managementService;
 
     @Test
-    @DisplayName("test case post getTotalMoney success.")
-    void test_createTransaction_success() {
+    @DisplayName("test case getTotalMoney success.")
+    void test_getTotalMoney_success() {
         TotalMoneyResponse totalMoneyResponse = new TotalMoneyResponse();
         totalMoneyResponse.setTotalMoney(100.00);
         totalMoneyResponse.setBranchId(1);
@@ -47,6 +49,20 @@ class ManagementControllerTest {
         Map expected = objectMapper.convertValue(totalMoneyResponse, HashMap.class);
         assertEquals(MessageResponseEnum.SUCCESS.getMessage(), actual.getMessage());
         assertEquals(expected, actual.getData());
+    }
+
+    @Test
+    @DisplayName("test case post updateBankMoney success.")
+    void test_updateBankMoney_success() {
+        UpdateBankMoneyRequest updateBankMoneyRequest = new UpdateBankMoneyRequest();
+        updateBankMoneyRequest.setMoney(100);
+        updateBankMoneyRequest.setBranchId(1);
+        updateBankMoneyRequest.setEmployeeId(1);
+
+        Response actual = testRestTemplate.postForObject("/bank_money/update", updateBankMoneyRequest, Response.class);
+
+        assertEquals(MessageResponseEnum.SUCCESS.getMessage(), actual.getMessage());
+        assertEquals("", actual.getData());
     }
 
 }
