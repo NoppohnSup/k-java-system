@@ -2,7 +2,8 @@ package com.example.kjavasystem.utils.enums;
 
 public enum RoleEnum {
     TRANSPORT_STAFF(1, "transport staff"),
-    CASH_CENTER_STAFF(2, "cash center staff");
+    CASH_CENTER_STAFF(2, "cash center staff"),
+    MANAGER(3, "manager");
 
     private int roleId;
     private String message;
