@@ -1,22 +1,24 @@
 package com.example.kjavasystem.transaction.service;
 
 import com.example.kjavasystem.transaction.dto.TransactionDto;
-import com.example.kjavasystem.transaction.entity.Branch;
-import com.example.kjavasystem.transaction.entity.Employee;
-import com.example.kjavasystem.transaction.entity.Transaction;
+import com.example.kjavasystem.transaction.entity.*;
 import com.example.kjavasystem.transaction.exception.CreateTransactionFailException;
 import com.example.kjavasystem.transaction.exception.RoleCannotAccessException;
 import com.example.kjavasystem.transaction.exception.TransactionNotFoundException;
-import com.example.kjavasystem.transaction.repository.BranchRepository;
-import com.example.kjavasystem.transaction.repository.EmployeeRepository;
-import com.example.kjavasystem.transaction.repository.TransactionRepository;
+import com.example.kjavasystem.transaction.exception.UpdateTransactionNotFoundException;
+import com.example.kjavasystem.transaction.repository.*;
+import com.example.kjavasystem.transaction.request.TransactionReceiveRequest;
 import com.example.kjavasystem.transaction.request.TransactionRequest;
+import com.example.kjavasystem.utils.DateUtils;
 import com.example.kjavasystem.utils.enums.RoleEnum;
+import com.example.kjavasystem.utils.enums.TransactionStatusEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.Timestamp;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +34,15 @@ class TransactionServiceTest {
 
     @Mock
     EmployeeRepository employeeRepository;
+
+    @Mock
+    BankMoneyRepository bankMoneyRepository;
+
+    @Mock
+    BankMoneyHistoryRepository bankMoneyHistoryRepository;
+
+    @Mock
+    DateUtils dateUtils;
 
     @Test
     @DisplayName("test case create transaction success")
@@ -193,6 +204,103 @@ class TransactionServiceTest {
         RoleCannotAccessException exception = assertThrows(RoleCannotAccessException.class, () -> transactionService.getTransaction(1, "1234", 1));
 
         String expectedMessage = "Your role cannot access data.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    @DisplayName("test case updateTransaction success")
+    void test_updateTransaction_success() {
+        TransactionService transactionService = new TransactionService();
+        transactionService.setTransactionRepository(transactionRepository);
+        transactionService.setBankMoneyRepository(bankMoneyRepository);
+        transactionService.setBankMoneyHistoryRepository(bankMoneyHistoryRepository);
+        transactionService.setDateUtils(dateUtils);
+
+        TransactionReceiveRequest transactionReceiveRequest = new TransactionReceiveRequest();
+        transactionReceiveRequest.setTransactionId(1);
+        transactionReceiveRequest.setReceiveBy(1);
+        transactionReceiveRequest.setTotalMoney(100.00);
+        transactionReceiveRequest.setReceiveBranchId(1);
+        transactionReceiveRequest.setMoneyBoxId("1234");
+
+        Transaction transaction = new Transaction();
+        transaction.setId(1);
+        transaction.setStatus(TransactionStatusEnum.CREATED.getStatus());
+
+        BankMoney bankMoney = new BankMoney();
+        bankMoney.setId(1);
+        bankMoney.setTotalMoney(100.00);
+        bankMoney.setBranchId(1);
+        bankMoney.setUpdatedBy(2);
+
+        when(transactionRepository.findByIdAndMoneyBoxId(anyInt(), anyString())).thenReturn(Optional.of(transaction));
+        when(bankMoneyRepository.findByBranchId(anyInt())).thenReturn(Optional.of(bankMoney));
+        when(dateUtils.getCurrentDate()).thenReturn(new Timestamp(1645950039));
+
+        transactionService.updateTransaction(transactionReceiveRequest);
+
+        transaction.setStatus(TransactionStatusEnum.RECEIVE.getStatus());
+        transaction.setTotalMoney(100.00);
+
+        bankMoney.setTotalMoney(200.00);
+        bankMoney.setUpdatedBy(1);
+        bankMoney.setUpdatedAt(new Timestamp(1645950039));
+
+        verify(transactionRepository).save(transaction);
+        verify(bankMoneyRepository).save(bankMoney);
+    }
+
+    @Test
+    @DisplayName("test case updateTransaction branch not found")
+    void test_updateTransaction_branch_not_found() {
+        TransactionService transactionService = new TransactionService();
+        transactionService.setTransactionRepository(transactionRepository);
+        transactionService.setBankMoneyRepository(bankMoneyRepository);
+        transactionService.setBankMoneyHistoryRepository(bankMoneyHistoryRepository);
+        transactionService.setDateUtils(dateUtils);
+
+        TransactionReceiveRequest transactionReceiveRequest = new TransactionReceiveRequest();
+        transactionReceiveRequest.setTransactionId(1);
+        transactionReceiveRequest.setReceiveBy(1);
+        transactionReceiveRequest.setTotalMoney(100.00);
+        transactionReceiveRequest.setReceiveBranchId(1);
+        transactionReceiveRequest.setMoneyBoxId("1234");
+
+        Transaction transaction = new Transaction();
+        transaction.setId(1);
+        transaction.setStatus(TransactionStatusEnum.CREATED.getStatus());
+
+        when(transactionRepository.findByIdAndMoneyBoxId(anyInt(), anyString())).thenReturn(Optional.of(transaction));
+        when(bankMoneyRepository.findByBranchId(anyInt())).thenReturn(Optional.empty());
+
+        UpdateTransactionNotFoundException exception = assertThrows(UpdateTransactionNotFoundException.class, () -> transactionService.updateTransaction(transactionReceiveRequest));
+
+        String expectedMessage = "Branch not found.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    @DisplayName("test case updateTransaction transaction not found")
+    void test_updateTransaction_transaction_not_found() {
+        TransactionService transactionService = new TransactionService();
+        transactionService.setTransactionRepository(transactionRepository);
+
+        TransactionReceiveRequest transactionReceiveRequest = new TransactionReceiveRequest();
+        transactionReceiveRequest.setTransactionId(1);
+        transactionReceiveRequest.setReceiveBy(1);
+        transactionReceiveRequest.setTotalMoney(100.00);
+        transactionReceiveRequest.setReceiveBranchId(1);
+        transactionReceiveRequest.setMoneyBoxId("1234");
+
+        when(transactionRepository.findByIdAndMoneyBoxId(anyInt(), anyString())).thenReturn(Optional.empty());
+
+        UpdateTransactionNotFoundException exception = assertThrows(UpdateTransactionNotFoundException.class, () -> transactionService.updateTransaction(transactionReceiveRequest));
+
+        String expectedMessage = "Transaction not found.";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));

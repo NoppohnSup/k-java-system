@@ -1,6 +1,7 @@
 package com.example.kjavasystem.transaction.controller;
 
 import com.example.kjavasystem.transaction.dto.TransactionDto;
+import com.example.kjavasystem.transaction.request.TransactionReceiveRequest;
 import com.example.kjavasystem.transaction.request.TransactionRequest;
 import com.example.kjavasystem.transaction.response.TransactionResponse;
 import com.example.kjavasystem.transaction.service.TransactionService;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -63,6 +65,23 @@ class TransactionControllerTest {
         Map expected = objectMapper.convertValue(transactionDto, HashMap.class);
         assertEquals(MessageResponseEnum.SUCCESS.getMessage(), actual.getMessage());
         assertEquals(expected, actual.getData());
+    }
+
+    @Test
+    @DisplayName("test case post updateTransaction success.")
+    void test_updateTransaction_success() {
+        TransactionReceiveRequest transactionReceiveRequest = new TransactionReceiveRequest();
+        transactionReceiveRequest.setTransactionId(1);
+        transactionReceiveRequest.setReceiveBy(1);
+        transactionReceiveRequest.setReceiveBranchId(1);
+        transactionReceiveRequest.setMoneyBoxId("1234");
+        transactionReceiveRequest.setTotalMoney(100.00);
+        doNothing().when(transactionService).updateTransaction(any(TransactionReceiveRequest.class));
+
+        Response actual = testRestTemplate.postForObject("/transaction/update", transactionReceiveRequest, Response.class);
+
+        assertEquals(MessageResponseEnum.SUCCESS.getMessage(), actual.getMessage());
+        assertEquals("", actual.getData());
     }
 
 }
