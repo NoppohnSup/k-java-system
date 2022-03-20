@@ -39,7 +39,7 @@ public class TransactionController {
         return new Response(transaction, MessageResponseEnum.SUCCESS.getMessage());
     }
 
-    @PutMapping(value = "/transaction", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/transaction", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response updateTransaction(@RequestBody TransactionReceiveRequest transactionRequest) {
         transactionService.updateTransaction(transactionRequest);
         return new Response("", MessageResponseEnum.SUCCESS.getMessage());
