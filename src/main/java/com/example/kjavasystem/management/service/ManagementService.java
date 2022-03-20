@@ -23,6 +23,14 @@ public class ManagementService {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    public void setBankMoneyRepository(BankMoneyRepository bankMoneyRepository) {
+        this.bankMoneyRepository = bankMoneyRepository;
+    }
+
+    public void setEmployeeRepository(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
+
     public TotalMoneyResponse getTotalMoneyFromBranch(int branchId, int employeeId) {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
 
