@@ -3,7 +3,6 @@ package com.example.kjavasystem.transaction.request;
 public class TransactionRequest {
     private int cratedBy;
     private double totalMoney;
-    private String status;
     private int receiveBranchId;
     private int senderBranchId;
 
@@ -24,14 +23,6 @@ public class TransactionRequest {
 
     public void setTotalMoney(double totalMoney) {
         this.totalMoney = totalMoney;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public int getReceiveBranchId() {

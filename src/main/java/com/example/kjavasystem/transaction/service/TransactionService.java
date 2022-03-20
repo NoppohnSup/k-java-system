@@ -1,18 +1,18 @@
 package com.example.kjavasystem.transaction.service;
 
 import com.example.kjavasystem.transaction.dto.TransactionDto;
-import com.example.kjavasystem.transaction.entity.Branch;
-import com.example.kjavasystem.transaction.entity.Employee;
-import com.example.kjavasystem.transaction.entity.Transaction;
+import com.example.kjavasystem.transaction.entity.*;
 import com.example.kjavasystem.transaction.exception.CreateTransactionFailException;
 import com.example.kjavasystem.transaction.exception.RoleCannotAccessException;
 import com.example.kjavasystem.transaction.exception.TransactionNotFoundException;
-import com.example.kjavasystem.transaction.repository.BranchRepository;
-import com.example.kjavasystem.transaction.repository.EmployeeRepository;
-import com.example.kjavasystem.transaction.repository.TransactionRepository;
+import com.example.kjavasystem.transaction.exception.UpdateTransactionNotFoundException;
+import com.example.kjavasystem.transaction.repository.*;
+import com.example.kjavasystem.transaction.request.TransactionReceiveRequest;
 import com.example.kjavasystem.transaction.request.TransactionRequest;
 import com.example.kjavasystem.transaction.response.TransactionResponse;
+import com.example.kjavasystem.utils.DateUtils;
 import com.example.kjavasystem.utils.enums.RoleEnum;
+import com.example.kjavasystem.utils.enums.TransactionStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +31,15 @@ public class TransactionService {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    @Autowired
+    BankMoneyRepository bankMoneyRepository;
+
+    @Autowired
+    BankMoneyHistoryRepository bankMoneyHistoryRepository;
+
+    @Autowired
+    DateUtils dateUtils;
+
     public TransactionService() {
     }
 
@@ -46,6 +55,18 @@ public class TransactionService {
         this.employeeRepository = employeeRepository;
     }
 
+    public void setBankMoneyRepository(BankMoneyRepository bankMoneyRepository) {
+        this.bankMoneyRepository = bankMoneyRepository;
+    }
+
+    public void setDateUtils(DateUtils dateUtils) {
+        this.dateUtils = dateUtils;
+    }
+
+    public void setBankMoneyHistoryRepository(BankMoneyHistoryRepository bankMoneyHistoryRepository) {
+        this.bankMoneyHistoryRepository = bankMoneyHistoryRepository;
+    }
+
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest transactionRequest){
         try {
@@ -53,7 +74,7 @@ public class TransactionService {
             Transaction transaction = new Transaction();
             transaction.setMoneyBoxId(moneyBoxId);
             transaction.setTotalMoney(transactionRequest.getTotalMoney());
-            transaction.setStatus(transactionRequest.getStatus());
+            transaction.setStatus(TransactionStatusEnum.CREATED.getStatus());
             transaction.setSenderBranchId(transactionRequest.getSenderBranchId());
             transaction.setReceiveBranchId(transactionRequest.getReceiveBranchId());
             transaction.setCreatedBy(transactionRequest.getCratedBy());
@@ -102,5 +123,41 @@ public class TransactionService {
             throw new TransactionNotFoundException("Employee not found.");
         }
         throw new TransactionNotFoundException("Transaction not found.");
+    }
+
+    @Transactional
+    public void updateTransaction(TransactionReceiveRequest transactionRequest){
+        Optional<Transaction> transaction = transactionRepository.findByIdAndMoneyBoxId(transactionRequest.getTransactionId(), transactionRequest.getMoneyBoxId());
+
+        if (transaction.isPresent() && TransactionStatusEnum.CREATED.getStatus().equals(transaction.get().getStatus())) {
+            transaction.get().setTotalMoney(transactionRequest.getTotalMoney());
+            transaction.get().setStatus(TransactionStatusEnum.RECEIVE.getStatus());
+
+            transactionRepository.save(transaction.get());
+
+            Optional<BankMoney> bankMoney = bankMoneyRepository.findByBranchId(transactionRequest.getReceiveBranchId());
+
+            if (bankMoney.isPresent()) {
+                BankMoneyHistory bankMoneyHistory = new BankMoneyHistory();
+                bankMoneyHistory.setBankMoneyId(bankMoney.get().getId());
+                bankMoneyHistory.setTransactionId(transactionRequest.getTransactionId());
+                bankMoneyHistory.setBranchId(bankMoney.get().getBranchId());
+                bankMoneyHistory.setTotalMoney(bankMoney.get().getTotalMoney());
+                bankMoneyHistory.setUpdatedBy(bankMoney.get().getUpdatedBy());
+                bankMoneyHistory.setCreatedAt(bankMoney.get().getCreatedAt());
+                bankMoneyHistory.setUpdatedAt(bankMoney.get().getUpdatedAt());
+                bankMoneyHistoryRepository.save(bankMoneyHistory);
+
+                double totalMoneyInBank = bankMoney.get().getTotalMoney();
+                bankMoney.get().setTotalMoney(totalMoneyInBank + transactionRequest.getTotalMoney());
+                bankMoney.get().setUpdatedAt(dateUtils.getCurrentDate());
+                bankMoney.get().setUpdatedBy(transactionRequest.getReceiveBy());
+                bankMoneyRepository.save(bankMoney.get());
+            } else {
+                throw new UpdateTransactionNotFoundException("Branch not found.");
+            }
+        } else {
+            throw new UpdateTransactionNotFoundException("Transaction not found.");
+        }
     }
 }

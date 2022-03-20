@@ -5,6 +5,7 @@ import com.example.kjavasystem.transaction.entity.Transaction;
 import com.example.kjavasystem.transaction.exception.CreateTransactionFailException;
 import com.example.kjavasystem.transaction.exception.TransactionNotFoundException;
 import com.example.kjavasystem.transaction.repository.TransactionRepository;
+import com.example.kjavasystem.transaction.request.TransactionReceiveRequest;
 import com.example.kjavasystem.transaction.request.TransactionRequest;
 import com.example.kjavasystem.transaction.response.TransactionResponse;
 import com.example.kjavasystem.transaction.service.TransactionService;
@@ -36,5 +37,11 @@ public class TransactionController {
     public Response getTransaction(@PathVariable Integer id, @RequestParam String moneyBoxId, @RequestParam Integer employeeId){
         TransactionDto transaction = transactionService.getTransaction(id, moneyBoxId, employeeId);
         return new Response(transaction, MessageResponseEnum.SUCCESS.getMessage());
+    }
+
+    @PutMapping(value = "/transaction", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response updateTransaction(@RequestBody TransactionReceiveRequest transactionRequest) {
+        transactionService.updateTransaction(transactionRequest);
+        return new Response("", MessageResponseEnum.SUCCESS.getMessage());
     }
 }
