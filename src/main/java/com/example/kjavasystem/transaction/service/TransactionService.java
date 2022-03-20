@@ -31,8 +31,19 @@ public class TransactionService {
     @Autowired
     EmployeeRepository employeeRepository;
 
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService() {
+    }
+
+    public void setTransactionRepository(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
+    }
+
+    public void setBranchRepository(BranchRepository branchRepository) {
+        this.branchRepository = branchRepository;
+    }
+
+    public void setEmployeeRepository(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
     }
 
     @Transactional
