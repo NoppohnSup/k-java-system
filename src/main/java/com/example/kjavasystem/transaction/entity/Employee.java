@@ -10,6 +10,10 @@ import javax.persistence.Table;
 public class Employee {
     @Id
     private int id;
+    @Column(name = "username")
+    private String username;
+    @Column(name = "password")
+    private String password;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
@@ -20,6 +24,22 @@ public class Employee {
     private int roleId;
 
     public Employee() {
+    }
+
+    public String getUserName() {
+        return username;
+    }
+
+    public void setUserName(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public int getId() {
