@@ -3,7 +3,6 @@ package com.example.kjavasystem.management.service;
 import com.example.kjavasystem.management.exception.CannotAccessDataException;
 import com.example.kjavasystem.management.response.TotalMoneyResponse;
 import com.example.kjavasystem.transaction.entity.BankMoney;
-import com.example.kjavasystem.transaction.entity.BankMoneyHistory;
 import com.example.kjavasystem.transaction.entity.Employee;
 import com.example.kjavasystem.transaction.repository.BankMoneyHistoryRepository;
 import com.example.kjavasystem.transaction.repository.BankMoneyRepository;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
 import java.util.Optional;
