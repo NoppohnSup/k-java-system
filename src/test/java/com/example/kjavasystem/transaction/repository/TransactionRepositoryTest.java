@@ -30,11 +30,11 @@ class TransactionRepositoryTest {
     @DisplayName("repository test case findByIdAndMoneyBoxId.")
     void test_findByIdAndMoneyBoxId_success() {
         Transaction transaction = new Transaction();
-        transaction.setId(1);
+        transaction.setId(2);
         transaction.setMoneyBoxId("1234");
         transactionRepository.save(transaction);
 
-        Optional<Transaction> actual = transactionRepository.findByIdAndMoneyBoxId(1, "1234");
+        Optional<Transaction> actual = transactionRepository.findByIdAndMoneyBoxId(2, "1234");
         assertTrue(actual.isPresent());
     }
 }
